@@ -37,7 +37,8 @@ public class DebeziumConnectorConfig {
                 .with("offset.flush.interval.ms", "60000").with("database.hostname", env.getProperty("slave.datasource.host")).with("database.port", env.getProperty("slave.datasource.port"))
                 .with("database.user", env.getProperty("slave.datasource.username")).with("database.password", env.getProperty("slave.datasource.password"))
                 .with("database.dbname", env.getProperty("slave.datasource.database")).with("database.server.id", "10181").with("database.server.name", "customer-postgres-db-server")
-                .with("topic.prefix", "slave-postgresql").with("database.history", "io.debezium.relational.history.MemoryDatabaseHistory").with("table.include.list", "public.sale_sale_order")
+                .with("topic.prefix", "slave-postgresql").with("database.history", "io.debezium.relational.history.MemoryDatabaseHistory")
+                .with("table.include.list", "public.sale_sale_order,public.base_product,public.base_partner")
                 .with("plugin.name", "pgoutput").with("slot.name", "dbz_customerdb_listener_4").build();
 
     }

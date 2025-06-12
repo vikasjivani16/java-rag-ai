@@ -60,7 +60,7 @@ public class OpenAIService2 {
         return response.getBody().data.get(0).embedding;
     }
 
-    public List<Float> getAndSaveEmbedding(String text, int saleOrderId) {
+    public List<Float> getAndSaveEmbedding(String text, String saleOrderId) {
         // Call OpenAI
         List<Float> embedding = getEmbedding(text);
 
@@ -71,8 +71,8 @@ public class OpenAIService2 {
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
             System.out.println("Connected to PostgreSQL!");
 
-            PreparedStatement selectStmt = conn.prepareStatement("SELECT * FROM embeddings WHERE sale_order_id = ?");
-            selectStmt.setInt(1, saleOrderId);
+            PreparedStatement selectStmt = conn.prepareStatement("SELECT * FROM embeddings WHERE object_id = ?");
+            selectStmt.setString(1, "SALE_ORDER_" + saleOrderId);
             ResultSet resultSet = selectStmt.executeQuery();
 
             boolean alredyRecordExist = resultSet.next();
@@ -87,26 +87,26 @@ public class OpenAIService2 {
                 // deleteStmt.setString(1, String.valueOf(saleOrderId));
                 // deleteStmt.executeUpdate();
 
-                String sql = "UPDATE embeddings SET resource_id = ?, content = ?, embedding = ?, sale_order_id = ? WHERE id = ?";
+                String sql = "UPDATE embeddings SET resource_id = ?, content = ?, embedding = ?, object_id = ? WHERE id = ?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
 
                 stmt.setString(1, "lw5gj3mnt4f9bwa17b2gh");
                 stmt.setString(2, text);
                 stmt.setObject(3, new PGvector(embedding));
-                stmt.setObject(4, saleOrderId);
+                stmt.setObject(4, "SALE_ORDER_" + saleOrderId);
                 stmt.setObject(5, id);
 
                 stmt.executeUpdate();
 
             } else {
                 System.err.println("Insert Recored..!!");
-                String sql = "INSERT INTO embeddings (id, resource_id, content, embedding, sale_order_id) VALUES (?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO embeddings (id, resource_id, content, embedding, object_id) VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setString(1, generateSecureString(21));
                 stmt.setString(2, "lw5gj3mnt4f9bwa17b2gh");
                 stmt.setString(3, text);
                 stmt.setObject(4, new PGvector(embedding));
-                stmt.setObject(5, saleOrderId);
+                stmt.setObject(5, "SALE_ORDER_" + saleOrderId);
                 stmt.executeUpdate();
             }
 
@@ -115,7 +115,6 @@ public class OpenAIService2 {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
 
         // Save in DB
         // TextEmbedding entity = new TextEmbedding();
@@ -137,6 +136,115 @@ public class OpenAIService2 {
         }
 
         return sb.toString();
+    }
+
+    public List<Float> generateAndSaveProductObjectEmbedding(String text, String productId) {
+        // Call OpenAI
+        List<Float> embedding = getEmbedding(text);
+
+        String url = "jdbc:postgresql://localhost:5433/next_ai";
+        String user = "postgres";
+        String password = "root";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            System.out.println("Connected to PostgreSQL!");
+
+            PreparedStatement selectStmt = conn.prepareStatement("SELECT * FROM embeddings WHERE object_id = ?");
+            selectStmt.setString(1, "PRODUCT_" + productId);
+            ResultSet resultSet = selectStmt.executeQuery();
+
+            boolean alredyRecordExist = resultSet.next();
+            System.err.println(alredyRecordExist);
+
+            if (alredyRecordExist) {
+
+                String id = resultSet.getString("id");
+
+                System.err.println("Update Recored..!!");
+
+                String sql = "UPDATE embeddings SET resource_id = ?, content = ?, embedding = ?, object_id = ? WHERE id = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+
+                stmt.setString(1, "lw5gj3mnt4f9bwa17b2gh");
+                stmt.setString(2, text);
+                stmt.setObject(3, new PGvector(embedding));
+                stmt.setObject(4, "PRODUCT_" + productId);
+                stmt.setObject(5, id);
+
+                stmt.executeUpdate();
+
+            } else {
+                System.err.println("Insert Recored..!!");
+                String sql = "INSERT INTO embeddings (id, resource_id, content, embedding, object_id) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, generateSecureString(21));
+                stmt.setString(2, "lw5gj3mnt4f9bwa17b2gh");
+                stmt.setString(3, text);
+                stmt.setObject(4, new PGvector(embedding));
+                stmt.setObject(5, "PRODUCT_" + productId);
+                stmt.executeUpdate();
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return embedding;
+    }
+
+    public List<Float> generateAndSavePartnerObjectEmbedding(String text, String partnerId) {
+        // Call OpenAI
+        List<Float> embedding = getEmbedding(text);
+
+        String url = "jdbc:postgresql://localhost:5433/next_ai";
+        String user = "postgres";
+        String password = "root";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            System.out.println("Connected to PostgreSQL!");
+
+            PreparedStatement selectStmt = conn.prepareStatement("SELECT * FROM embeddings WHERE object_id = ?");
+            selectStmt.setString(1, "PARTNER_" + partnerId);
+            ResultSet resultSet = selectStmt.executeQuery();
+
+            boolean alredyRecordExist = resultSet.next();
+            System.err.println(alredyRecordExist);
+
+            if (alredyRecordExist) {
+
+                String id = resultSet.getString("id");
+
+                System.err.println("Update Recored..!!");
+
+                String sql = "UPDATE embeddings SET resource_id = ?, content = ?, embedding = ?, object_id = ? WHERE id = ?";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+
+                stmt.setString(1, "lw5gj3mnt4f9bwa17b2gh");
+                stmt.setString(2, text);
+                stmt.setObject(3, new PGvector(embedding));
+                stmt.setObject(4, "PARTNER_" + partnerId);
+                stmt.setObject(5, id);
+
+                stmt.executeUpdate();
+
+            } else {
+                System.err.println("Insert Recored..!!");
+                String sql = "INSERT INTO embeddings (id, resource_id, content, embedding, object_id) VALUES (?, ?, ?, ?, ?)";
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                stmt.setString(1, generateSecureString(21));
+                stmt.setString(2, "lw5gj3mnt4f9bwa17b2gh");
+                stmt.setString(3, text);
+                stmt.setObject(4, new PGvector(embedding));
+                stmt.setObject(5, "PARTNER_" + partnerId);
+                stmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return embedding;
     }
 
 }

@@ -21,6 +21,6 @@ public class EmbeddingController {
     @GetMapping
     public List<Float> getEmbedding(@RequestParam String text) {
         System.err.println("HELLO....!" + text);
-        return openAIService.getAndSaveEmbedding(text, 1);
+        return openAIService.getAndSaveEmbedding(text, "1");
     }
 }

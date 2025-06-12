@@ -40,19 +40,60 @@ public class DebeziumListener {
         var sourceRecordChangeValue = (Struct) sourceRecord.value();
         System.err.println("SourceRecordChangeValue = " + sourceRecordChangeValue);
         if (sourceRecordChangeValue != null) {
-            Struct struct = (Struct) sourceRecordChangeValue.get("after");
-            String id = (String) struct.get("id").toString();
-            String delivery_address_str = (String) struct.get("delivery_address_str").toString();
-            // String sale_order_seq = (String) struct.get("sale_order_seq").toString();
-            String in_tax_total = (String) struct.get("in_tax_total").toString();
 
-            String link = "http://localhost:8081/#/ds/sc.root.sale.quotations/edit/" + id;
+            Struct structSource = (Struct) sourceRecordChangeValue.get("source");
 
-            text = "SaleOrder with id " + id + " is created and delivey address is " + delivery_address_str + ". Total order value is" + in_tax_total + ". The link of saleorder is " + link;
+            String table = structSource.get("table").toString();
 
-            System.err.println(text);
-            openAIService2.getAndSaveEmbedding(text, Integer.parseInt(id));
-            System.err.println(sourceRecordChangeValue);
+            System.out.println("I am ! " + table);
+            if (table.equals("sale_sale_order")) {
+
+                Struct struct = (Struct) sourceRecordChangeValue.get("after");
+                String id = (String) struct.get("id").toString();
+                String delivery_address_str = (String) struct.get("delivery_address_str").toString();
+                String in_tax_total = (String) struct.get("in_tax_total").toString();
+                String link = "http://localhost:8081/#/ds/sc.root.sale.quotations/edit/" + id;
+
+                text = "SaleOrder with id " + id + " is created and delivey address is " + delivery_address_str + ". Total order value is" + in_tax_total + ". The link of saleorder is " + link;
+
+                System.err.println(text);
+                openAIService2.getAndSaveEmbedding(text, id);
+                System.err.println(sourceRecordChangeValue);
+            }
+
+            if (table.equals("base_product")) {
+                Struct struct = (Struct) sourceRecordChangeValue.get("after");
+                String id = (String) struct.get("id").toString();
+                String code = (String) struct.get("code").toString();
+                String fullName = (String) struct.get("full_name").toString();
+                String name = (String) struct.get("name").toString();
+                String purchasePrice = (String) struct.get("purchase_price").toString();
+                String salePrice = (String) struct.get("sale_price").toString();
+
+                String link = "http://localhost:8081/#/ds/sc.root.sale.products/edit/" + id;
+
+                text = "Product with id " + id + "present and product code is " + code + ". The name of product is" + name + ". the full name is " + fullName + ". the purchase prise is "
+                        + purchasePrice + "and sale prise is " + salePrice + ". the link of product is " + link;
+
+                System.err.println(text);
+                openAIService2.generateAndSaveProductObjectEmbedding(text, id);
+            }
+
+            if (table.equals("base_partner")) {
+                Struct struct = (Struct) sourceRecordChangeValue.get("after");
+                String id = (String) struct.get("id").toString();
+                String fullName = (String) struct.get("full_name").toString();
+                String name = (String) struct.get("name").toString();
+
+                String link = "http://localhost:8081/#/ds/sc.root.sale.customers/edit/" + id;
+
+                text = "Customer with id " + id + "present and name of Customer is" + name + ". Customer full name is " + fullName + ". the link of Customer is " + link;
+
+                System.err.println(text);
+                openAIService2.generateAndSavePartnerObjectEmbedding(text, id);
+            }
+
+
         }
     }
 
